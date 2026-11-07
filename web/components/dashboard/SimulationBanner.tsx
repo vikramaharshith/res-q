@@ -5,7 +5,7 @@ export function SimulationBanner() {
         SIMULATION — NOT FOR REAL EMERGENCIES
       </p>
       <p className="text-[11px] font-medium text-amber-950/80 sm:text-xs">
-        Fictional flood data for development. No real dispatch and no AI findings.
+        Fictional flood data. No real dispatch. Nemotron advice is labeled separately and does not assign responders.
       </p>
     </div>
   );

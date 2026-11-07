@@ -16,9 +16,11 @@ import type { Incident, Report } from "@/lib/demo/types";
 export function IncidentDetail({
   incident,
   reports,
+  sessionDraft = false,
 }: {
   incident: Incident;
   reports: Report[];
+  sessionDraft?: boolean;
 }) {
   return (
     <section>
@@ -59,6 +61,13 @@ export function IncidentDetail({
           </p>
         ) : null}
         <p className="text-xs leading-5 text-slate-400">{incident.priorityBasis}</p>
+        {sessionDraft ? (
+          <p className="rounded-lg border border-cyan-300/20 bg-cyan-300/5 px-3 py-2 text-xs leading-5 text-cyan-50">
+            A Nemotron draft from this browser session is in the investigation
+            panel. The priority, status, and original reports in this section
+            are still the deterministic scenario baseline.
+          </p>
+        ) : null}
         {incident.lowDetail ? (
           <p className="rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs leading-5 text-slate-300">
             The generator flagged this case because the original message is

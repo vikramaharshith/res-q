@@ -1,15 +1,23 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { InvestigationPanel } from "@/components/agent/InvestigationPanel";
-import { CommandHeader } from "@/components/dashboard/CommandHeader";
+import {
+  agentHeaderState,
+  CommandHeader,
+} from "@/components/dashboard/CommandHeader";
 import { MetricsStrip } from "@/components/dashboard/MetricsStrip";
 import { SimulationBanner } from "@/components/dashboard/SimulationBanner";
 import { IncidentDetail } from "@/components/incidents/IncidentDetail";
 import { IncidentQueue } from "@/components/incidents/IncidentQueue";
 import { ResponderPanel } from "@/components/responders/ResponderPanel";
+import {
+  isAgentRunDto,
+  type AgentRunDto,
+  type InvestigationSession,
+} from "@/lib/ai/types";
 import { cn } from "@/lib/cn";
 import {
   assignmentForIncident,
@@ -43,9 +51,40 @@ function initialIncidentId(): string {
   return sample?.id ?? DEMO_SCENARIO.incidents[0]?.id ?? "";
 }
 
+function browserFailure(incidentId: string, message: string): AgentRunDto {
+  const now = new Date().toISOString();
+  return {
+    run_id: `local_${crypto.randomUUID()}`,
+    status: "FAILED",
+    model_id: null,
+    incident_id: incidentId,
+    scenario_id: DEMO_SCENARIO.id,
+    simulation: true,
+    advisory: true,
+    assignment_created: false,
+    multi_step: false,
+    distinct_tool_count: 0,
+    tool_call_count: 0,
+    tool_events: [],
+    recommendation: null,
+    validation_retried: false,
+    recorded_by: "browser",
+    started_at: now,
+    finished_at: now,
+    error: {
+      code: "REQUEST_FAILED",
+      message,
+      retryable: true,
+    },
+  };
+}
+
 export function CommandCenter() {
   const [selectedId, setSelectedId] = useState(initialIncidentId);
   const [tab, setTab] = useState<MobileTab>("queue");
+  const [runs, setRuns] = useState<Record<string, InvestigationSession>>({});
+  const [runningId, setRunningId] = useState<string | null>(null);
+  const investigationLock = useRef(false);
   const scenario = DEMO_SCENARIO;
   const metrics = getScenarioMetrics(scenario);
   const selected =
@@ -72,10 +111,84 @@ export function CommandCenter() {
     if (nextTab) setTab(nextTab);
   };
 
+  const investigate = async (incidentId: string) => {
+    if (investigationLock.current) return;
+    investigationLock.current = true;
+    setRunningId(incidentId);
+    setRuns((current) => ({
+      ...current,
+      [incidentId]: { phase: "running" },
+    }));
+    try {
+      const response = await fetch("/api/agent-runs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          incident_id: incidentId,
+          mode: "investigate",
+        }),
+        signal: AbortSignal.timeout(185_000),
+      });
+      const text = await response.text();
+      let parsed: unknown = null;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        parsed = null;
+      }
+      const run = isAgentRunDto(parsed)
+        ? parsed
+        : browserFailure(
+            incidentId,
+            "The investigation route did not return a usable result. Nothing was assigned.",
+          );
+      setRuns((current) => ({
+        ...current,
+        [incidentId]: { phase: "done", run },
+      }));
+    } catch (error) {
+      const timedOut =
+        error instanceof DOMException &&
+        (error.name === "TimeoutError" || error.name === "AbortError");
+      setRuns((current) => ({
+        ...current,
+        [incidentId]: {
+          phase: "done",
+          run: browserFailure(
+            incidentId,
+            timedOut
+              ? "The investigation request timed out in the browser. Nothing was assigned."
+              : "The browser could not finish the investigation request. Nothing was assigned.",
+          ),
+        },
+      }));
+    } finally {
+      investigationLock.current = false;
+      setRunningId(null);
+    }
+  };
+
+  const selectedSession = runs[selected.id];
+  const sessionDraft =
+    selectedSession?.phase === "done" &&
+    selectedSession.run.status === "COMPLETED";
+
   const caseFile = (
     <div className="resq-scroll h-full min-h-0 w-full overflow-y-auto bg-[#0c1726]">
-      <IncidentDetail incident={selected} reports={reports} />
-      <InvestigationPanel incidentId={selected.id} />
+      <IncidentDetail
+        incident={selected}
+        reports={reports}
+        sessionDraft={sessionDraft}
+      />
+      <InvestigationPanel
+        incidentId={selected.id}
+        session={selectedSession}
+        pending={runningId === selected.id}
+        blocked={runningId !== null && runningId !== selected.id}
+        onInvestigate={() => {
+          void investigate(selected.id);
+        }}
+      />
       <ResponderPanel
         responders={scenario.responders}
         assignment={assignment}
@@ -87,7 +200,10 @@ export function CommandCenter() {
   return (
     <div className="flex h-dvh min-h-0 flex-col overflow-hidden bg-[#071018] text-slate-100">
       <SimulationBanner />
-      <CommandHeader scenario={scenario} />
+      <CommandHeader
+        scenario={scenario}
+        agentState={agentHeaderState(runs, runningId)}
+      />
       <MetricsStrip metrics={metrics} />
       <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden lg:grid-cols-[minmax(17.5rem,28%)_minmax(0,1fr)_minmax(20rem,27%)]">
         <div

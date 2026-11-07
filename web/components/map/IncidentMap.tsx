@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { Map as LeafletMap } from "leaflet";
 import {
   CircleMarker,
   MapContainer,
@@ -14,6 +15,15 @@ import { availabilityHex, statusHex, statusLabel } from "@/lib/demo/labels";
 import type { Assignment, Incident, Responder } from "@/lib/demo/types";
 import { INCIDENT_STATUSES } from "@/lib/demo/types";
 
+function finitePair(lat: number, lon: number): boolean {
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lon) &&
+    Math.abs(lat) <= 90 &&
+    Math.abs(lon) <= 180
+  );
+}
+
 function pointsFor(
   incidents: Incident[],
   responders: Responder[],
@@ -25,7 +35,77 @@ function pointsFor(
     ...responders.map(
       (responder) => [responder.lat, responder.lon] as [number, number],
     ),
-  ];
+  ].filter((point) => finitePair(point[0], point[1]));
+}
+
+function mapIsLaidOut(map: LeafletMap): boolean {
+  const rect = map.getContainer().getBoundingClientRect();
+  return rect.width >= 40 && rect.height >= 40;
+}
+
+function mapCanMove(map: LeafletMap): boolean {
+  if (!mapIsLaidOut(map)) return false;
+  const size = map.getSize();
+  if (!size || size.x < 40 || size.y < 40) {
+    try {
+      map.invalidateSize({ animate: false, pan: false });
+    } catch {
+      return false;
+    }
+  }
+  const next = map.getSize();
+  if (!next || next.x < 40 || next.y < 40) return false;
+  try {
+    const center = map.getCenter();
+    return Number.isFinite(center.lat) && Number.isFinite(center.lng);
+  } catch {
+    return false;
+  }
+}
+
+function moveMapTo(map: LeafletMap, lat: number, lon: number): boolean {
+  if (!finitePair(lat, lon) || !mapCanMove(map)) return false;
+  const currentZoom = map.getZoom();
+  const zoom = Math.max(Number.isFinite(currentZoom) ? currentZoom : 12, 14);
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  try {
+    if (reduce) map.setView([lat, lon], zoom, { animate: false });
+    else map.flyTo([lat, lon], zoom, { duration: 0.55 });
+  } catch {
+    return false;
+  }
+  return true;
+}
+
+function fitMap(
+  map: LeafletMap,
+  points: [number, number][],
+  animate: boolean,
+): boolean {
+  const finite = points.filter((point) => finitePair(point[0], point[1]));
+  if (finite.length === 0 || !mapCanMove(map)) return false;
+  let south = finite[0][0];
+  let north = finite[0][0];
+  let west = finite[0][1];
+  let east = finite[0][1];
+  for (const [lat, lon] of finite) {
+    south = Math.min(south, lat);
+    north = Math.max(north, lat);
+    west = Math.min(west, lon);
+    east = Math.max(east, lon);
+  }
+  try {
+    map.fitBounds(
+      [
+        [south, west],
+        [north, east],
+      ],
+      { padding: [32, 32], animate, maxZoom: 14 },
+    );
+  } catch {
+    return false;
+  }
+  return true;
 }
 
 function MapViewport({
@@ -42,33 +122,47 @@ function MapViewport({
   fitToken: number;
 }) {
   const map = useMap();
+  const pointsRef = useRef(points);
+  const latRef = useRef(lat);
+  const lonRef = useRef(lon);
   const fitted = useRef(false);
-  const userMoved = useRef(false);
+  const pendingMove = useRef(false);
   const seenSelection = useRef<string | null>(null);
   const seenFitToken = useRef(fitToken);
 
   useEffect(() => {
+    pointsRef.current = points;
+    latRef.current = lat;
+    lonRef.current = lon;
+  }, [lat, lon, points]);
+
+  useEffect(() => {
     const container = map.getContainer();
-    const fit = () => {
-      const rect = container.getBoundingClientRect();
-      map.invalidateSize();
-      if (rect.width < 40 || rect.height < 40 || points.length === 0) return;
-      if (userMoved.current) {
+    let frame = 0;
+    const apply = () => {
+      if (
+        pendingMove.current &&
+        moveMapTo(map, latRef.current, lonRef.current)
+      ) {
+        pendingMove.current = false;
         fitted.current = true;
         return;
       }
-      if (fitted.current) return;
-      fitted.current = true;
-      map.fitBounds(points, { padding: [32, 32], animate: false });
+      if (fitted.current || pendingMove.current) return;
+      if (fitMap(map, pointsRef.current, false)) fitted.current = true;
     };
-    const observer = new ResizeObserver(() => fit());
+    const observer = new ResizeObserver(() => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(apply);
+    });
     observer.observe(container);
-    const timeout = window.setTimeout(fit, 60);
+    const timeout = window.setTimeout(apply, 60);
     return () => {
       observer.disconnect();
       window.clearTimeout(timeout);
+      window.cancelAnimationFrame(frame);
     };
-  }, [map, points]);
+  }, [map]);
 
   useEffect(() => {
     if (seenSelection.current === null) {
@@ -77,20 +171,19 @@ function MapViewport({
     }
     if (seenSelection.current === selectedId) return;
     seenSelection.current = selectedId;
-    userMoved.current = true;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const zoom = Math.max(map.getZoom(), 14);
-    if (reduce) map.setView([lat, lon], zoom);
-    else map.flyTo([lat, lon], zoom, { duration: 0.55 });
-  }, [lat, lon, map, selectedId]);
+    pendingMove.current = true;
+    if (moveMapTo(map, latRef.current, lonRef.current)) {
+      pendingMove.current = false;
+      fitted.current = true;
+    }
+  }, [map, selectedId]);
 
   useEffect(() => {
     if (seenFitToken.current === fitToken) return;
     seenFitToken.current = fitToken;
-    if (points.length === 0) return;
-    fitted.current = true;
-    map.fitBounds(points, { padding: [32, 32] });
-  }, [fitToken, map, points]);
+    pendingMove.current = false;
+    if (fitMap(map, pointsRef.current, false)) fitted.current = true;
+  }, [fitToken, map]);
 
   return null;
 }
@@ -145,7 +238,7 @@ export default function IncidentMap({
             fitToken={fitToken}
           />
         ) : null}
-        {ordered.map((incident) => {
+        {ordered.filter((incident) => finitePair(incident.lat, incident.lon)).map((incident) => {
           const selectedMarker = incident.id === selectedId;
           const color = statusHex(incident.status);
           return (
@@ -189,7 +282,7 @@ export default function IncidentMap({
             </CircleMarker>
           );
         })}
-        {responders.map((responder) => {
+        {responders.filter((responder) => finitePair(responder.lat, responder.lon)).map((responder) => {
           const active = assignments.find(
             (assignment) =>
               assignment.responderId === responder.id &&
