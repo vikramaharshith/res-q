@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+:root {
+  --background: #071018;
+  --foreground: #e7eef6;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at top, rgba(34, 211, 238, 0.08), transparent 46%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+.resq-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+}
+
+.resq-map .leaflet-container {
+  height: 100%;
+  width: 100%;
+  background: #0b1522;
+  font-family: inherit;
+}
+
+.resq-map .leaflet-tile-pane {
+  filter: brightness(0.82) saturate(0.72) contrast(1.05);
+}
+
+.resq-map .leaflet-popup-content-wrapper,
+.resq-map .leaflet-popup-tip {
+  background: #0f1b2d;
+  color: #e7eef6;
+}
+
+.resq-map .leaflet-popup-content-wrapper {
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.resq-map .leaflet-popup-content {
+  margin: 12px 14px;
+}
+
+.resq-map .leaflet-popup-content p {
+  margin: 0;
+}
+
+.resq-map .leaflet-popup-close-button {
+  color: #cbd5e1 !important;
+}
+
+.resq-map .leaflet-control-attribution {
+  background: rgba(7, 16, 24, 0.88) !important;
+  color: #94a3b8 !important;
+  max-width: 16rem;
+}
+
+.resq-map .leaflet-control-attribution a {
+  color: #7dd3fc !important;
+}
+
+.resq-map .leaflet-bar a {
+  background: #0f1b2d;
+  color: #e7eef6;
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.resq-map .leaflet-bar a:hover {
+  background: #16304a;
+}
