@@ -353,7 +353,7 @@ function initialSelection(board: ChaosSimulationBoard | null): string {
   return reportId ? `emergency:${reportId}` : "";
 }
 
-export function ChaosCommandCenter({ loaded }: { loaded: ChaosDashboardLoad }) {
+export function ChaosCommandCenter({ loaded, runSelector }: { loaded: ChaosDashboardLoad; runSelector?: ReactNode }) {
   const board = loaded.ok ? loaded.board : null;
   const frames = board ? localGridFrames(gridPlotInputs(board)) : [];
   const overview = frames[0] ?? emptyFrame();
@@ -379,6 +379,7 @@ export function ChaosCommandCenter({ loaded }: { loaded: ChaosDashboardLoad }) {
   return (
     <div className="min-h-dvh bg-[#050505] text-white" data-scenario="chaos">
       <div data-command-shell="" className="min-h-dvh">
+        {runSelector}
         <CommandTopBar
           subtitle={board?.sourceLabel ?? "Chaos Simulation"}
           active="chaos"

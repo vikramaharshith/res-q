@@ -1,0 +1,112 @@
+{
+  "environment": "Production Next.js HTTP SSR + local PGlite PostgreSQL HTTPS adapter, no browser or hosted Supabase",
+  "samples": [
+    {
+      "totalMs": 156.425196,
+      "headerMs": 22.736386999999993,
+      "bytes": 314527
+    },
+    {
+      "totalMs": 123.92443500000002,
+      "headerMs": 8.083140000000014,
+      "bytes": 314527
+    },
+    {
+      "totalMs": 107.58350399999995,
+      "headerMs": 7.385385999999983,
+      "bytes": 314527
+    },
+    {
+      "totalMs": 103.80137299999996,
+      "headerMs": 7.020285000000001,
+      "bytes": 314527
+    },
+    {
+      "totalMs": 90.98384299999998,
+      "headerMs": 6.3123469999999315,
+      "bytes": 314527
+    }
+  ],
+  "searchMs": 33.90971200000001,
+  "lastPageMs": 86.28620799999999,
+  "emptySearchMs": 29.02747700000009,
+  "recordsRenderedPerPage": 50,
+  "lastPageRecords": 14,
+  "databaseCallsPerPage": 2,
+  "approvalHttpStatus": 403,
+  "largeAdvisoryHttpStatus": 400,
+  "sampleVerified": true,
+  "urbanFloodFallbackVerified": true,
+  "browserVerified": false,
+  "localDatabase": {
+    "counts": {
+      "scenarios": 1,
+      "incidents": 1,
+      "reports": 1,
+      "responders": 1,
+      "agent_runs": 2,
+      "approval_actions": 2,
+      "chaos_dashboard_runs": 9,
+      "chaos_dashboard_page": 8,
+      "chaos_import_runs": 1,
+      "chaos_emergency_observations": 1,
+      "chaos_operational_observations": 1,
+      "chaos_units": 1,
+      "chaos_public_assignments": 1
+    },
+    "latency": {
+      "chaos_dashboard_runs": [
+        4.807619000000159,
+        1.348337000000356,
+        1.2523140000002968,
+        1.704913999999917,
+        1.2844619999996212,
+        1.137283999999454,
+        1.169130999999652,
+        0.9227060000002894,
+        1.0148520000002463
+      ],
+      "chaos_dashboard_page": [
+        50.72091400000045,
+        49.9059129999996,
+        44.7068790000003,
+        42.791071999999986,
+        45.78236199999992,
+        48.759148999999525,
+        9.835213000000294,
+        6.200130000000172
+      ],
+      "chaos_import_runs": [
+        1.8123639999994339
+      ],
+      "chaos_emergency_observations": [
+        1.0300050000005285
+      ],
+      "chaos_operational_observations": [
+        1.324811999999838
+      ],
+      "chaos_units": [
+        0.7662749999999505
+      ],
+      "chaos_public_assignments": [
+        0.5899329999992915
+      ]
+    },
+    "timings": {
+      "validationMs": 598.8800669999998,
+      "importMs": 2343.135078
+    },
+    "summary": {
+      "destination": "scn_chaos_large_flood_20261108_v1",
+      "importRunId": "cimp_run_0ff42bd5775c10eea0ef09898d033aa1",
+      "runId": "run_0c2b89ucqss0i",
+      "sha256": "0ff42bd5775c10eea0ef09898d033aa10a62870ac5e7266023be812b0072e586",
+      "sourceBytes": 11038954,
+      "payloadBytes": 13778509,
+      "emergency": 7864,
+      "operational": 718,
+      "units": 80,
+      "assignments": 80
+    }
+  }
+}
