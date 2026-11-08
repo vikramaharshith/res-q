@@ -11,7 +11,11 @@
     "demo:import:dry-run": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-demo-scenario.mts --dry-run",
     "chaos:import:dry-run": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-chaos-sample.mts",
     "chaos:import:sample": "node --experimental-strip-types --import ./scripts/register-chaos-import-once.mjs ./scripts/import-chaos-sample-once.mts",
-    "demo:import": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-demo-scenario.mts --apply"
+    "demo:import": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-demo-scenario.mts --apply",
+    "chaos:import:large": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-chaos-large.mts",
+    "test:large": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs --test lib/chaos/large-integration.test.ts",
+    "test:large:http": "bash ./scripts/test-large-local.sh",
+    "test:large:browser": "RESQ_TEST_BROWSER=1 bash ./scripts/test-large-local.sh"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
@@ -24,6 +28,8 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.15",
+    "@playwright/test": "^1.65.0",
     "@tailwindcss/turbopack": "^4",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^20",
