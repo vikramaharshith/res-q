@@ -1,5 +1,10 @@
-.env.local
-.env.local
-**/.env.local
+# Environment files. Example templates stay visible.
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
 **/node_modules/
 **/.next/

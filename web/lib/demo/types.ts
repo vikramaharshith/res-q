@@ -48,7 +48,13 @@ export type SampleKey = (typeof SAMPLE_KEYS)[number];
 
 export type AnalysisStatus = "NOT_AI_REVIEWED";
 
-export type AssignmentOrigin = "scenario_baseline";
+export const ASSIGNMENT_ORIGINS = [
+  "scenario_baseline",
+  "human_approval",
+  "human_override",
+] as const;
+
+export type AssignmentOrigin = (typeof ASSIGNMENT_ORIGINS)[number];
 
 export type AssignmentStatus = "ASSIGNED" | "IN_PROGRESS" | "COMPLETED";
 

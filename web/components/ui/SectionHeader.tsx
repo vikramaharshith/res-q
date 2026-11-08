@@ -4,19 +4,22 @@ export function SectionHeader({
   title,
   subtitle,
   aside,
+  level = 2,
 }: {
   title: string;
   subtitle?: string;
   aside?: ReactNode;
+  level?: 2 | 3;
 }) {
+  const Tag = level === 3 ? "h3" : "h2";
   return (
-    <div className="flex items-start justify-between gap-3 border-b border-white/10 px-4 py-3">
-      <div>
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-cyan-100/80">
+    <div className="flex flex-col gap-3 border-b border-white/[0.06] px-5 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-6">
+      <div className="min-w-0">
+        <Tag className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
           {title}
-        </h2>
+        </Tag>
         {subtitle ? (
-          <p className="mt-1 text-xs leading-5 text-slate-400">{subtitle}</p>
+          <p className="mt-1.5 text-sm leading-6 text-zinc-400">{subtitle}</p>
         ) : null}
       </div>
       {aside}

@@ -1,4 +1,4 @@
-import { DEMO_SCENARIO } from "@/lib/demo/scenario";
+import { loadCommandScenario } from "@/lib/demo/load-scenario";
 import type { Scenario } from "@/lib/demo/types";
 import {
   callNemotron,
@@ -211,8 +211,8 @@ async function requestTurn(input: {
 
 export async function investigateIncident(
   incidentId: string,
-  scenario: Scenario = DEMO_SCENARIO,
 ): Promise<InvestigationResult> {
+  const { scenario } = await loadCommandScenario();
   const incident = scenario.incidents.find((item) => item.id === incidentId);
   if (!incident) {
     const now = new Date().toISOString();

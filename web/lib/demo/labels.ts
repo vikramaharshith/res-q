@@ -1,4 +1,5 @@
 import type {
+  AssignmentOrigin,
   AssignmentStatus,
   IncidentCategory,
   IncidentPriority,
@@ -62,6 +63,17 @@ export function statusLabel(status: IncidentStatus): string {
       return "In progress";
     case "RESOLVED":
       return "Resolved";
+  }
+}
+
+export function assignmentOriginLabel(origin: AssignmentOrigin): string {
+  switch (origin) {
+    case "scenario_baseline":
+      return "Scenario baseline assignment";
+    case "human_approval":
+      return "Human-approved simulated assignment";
+    case "human_override":
+      return "Human override assignment";
   }
 }
 
@@ -152,7 +164,7 @@ export function availabilityBadgeClass(
 ): string {
   switch (availability) {
     case "AVAILABLE":
-      return "bg-teal-400/15 text-teal-100 ring-teal-300/50";
+      return "bg-emerald-400/15 text-emerald-100 ring-emerald-300/40";
     case "BUSY":
       return "bg-pink-400/15 text-pink-100 ring-pink-300/50";
     case "OFFLINE":
@@ -178,7 +190,7 @@ export function statusHex(status: IncidentStatus): string {
 export function availabilityHex(availability: ResponderAvailability): string {
   switch (availability) {
     case "AVAILABLE":
-      return "#2dd4bf";
+      return "#34d399";
     case "BUSY":
       return "#f472b6";
     case "OFFLINE":

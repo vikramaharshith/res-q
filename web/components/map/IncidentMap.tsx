@@ -218,7 +218,7 @@ export default function IncidentMap({
   });
 
   return (
-    <div className="resq-map relative h-full min-h-[20rem] bg-[#0b1522]">
+    <div className="resq-map relative h-full min-h-[22rem] bg-[#050505]">
       <MapContainer
         center={[mapCenter.lat, mapCenter.lon]}
         zoom={12}
@@ -247,7 +247,7 @@ export default function IncidentMap({
               center={[incident.lat, incident.lon]}
               radius={selectedMarker ? 11 : 7}
               pathOptions={{
-                color: selectedMarker ? "#f8fafc" : color,
+                color: selectedMarker ? "#67e8f9" : color,
                 weight: selectedMarker ? 3 : 1.5,
                 fillColor: color,
                 fillOpacity: 0.9,
@@ -321,18 +321,18 @@ export default function IncidentMap({
         })}
       </MapContainer>
       <div className="pointer-events-none absolute right-3 top-3 z-[500] flex max-w-[14rem] flex-col items-end gap-2">
-        <p className="rounded-lg border border-white/10 bg-[#071018]/90 px-3 py-2 text-[11px] leading-4 text-slate-200 shadow-lg">
+        <p className="rounded-xl border border-white/[0.08] bg-[#050505]/92 px-3 py-2 text-[11px] leading-4 text-zinc-200 shadow-lg">
           Simulated pins on OpenStreetMap. Not live emergencies.
         </p>
         <button
           type="button"
           onClick={() => setFitToken((value) => value + 1)}
-          className="pointer-events-auto rounded-lg border border-cyan-200/30 bg-[#071018]/90 px-3 py-1.5 text-[11px] font-semibold text-cyan-100"
+          className="pointer-events-auto rounded-xl border border-cyan-300/30 bg-[#050505]/92 px-3 py-1.5 text-[11px] font-semibold text-cyan-100 transition-colors duration-200 hover:border-cyan-200/60 hover:bg-cyan-300/10"
         >
           Show all
         </button>
       </div>
-      <ul className="pointer-events-none absolute bottom-5 left-3 z-[500] max-w-[16rem] space-y-1 rounded-lg border border-white/10 bg-[#071018]/90 px-3 py-2 text-[10px] text-slate-300 shadow-lg">
+      <ul className="pointer-events-none absolute bottom-5 left-3 z-[500] max-w-[16rem] space-y-1 rounded-xl border border-white/[0.08] bg-[#050505]/92 px-3 py-2 text-[10px] text-zinc-300 shadow-lg">
         {INCIDENT_STATUSES.map((status) => (
           <li key={status} className="flex items-center gap-2">
             <span

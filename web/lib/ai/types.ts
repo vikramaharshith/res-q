@@ -63,6 +63,9 @@ export interface AgentRunDto {
   started_at: string;
   finished_at: string;
   error: AgentErrorDto | null;
+  /** Present after the server tries to save the run. Omitted by older responses. */
+  stored?: boolean;
+  storage_code?: "stored" | "not_stored" | "migration_required";
 }
 
 export type InvestigationSession =

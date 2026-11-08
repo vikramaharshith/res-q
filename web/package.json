@@ -6,14 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs --test lib/approval/approval.test.ts lib/intro/startup-timeline.test.ts lib/simulation-import/simulation-import.test.ts lib/simulation-import/stage-plan.test.ts lib/simulation-import/chaos-import.test.ts lib/simulation-import/chaos-import-once.test.ts lib/dashboard/scenario-selection.test.ts lib/chaos/read-model.test.ts lib/chaos/investigation.test.ts",
+    "demo:import:dry-run": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-demo-scenario.mts --dry-run",
+    "chaos:import:dry-run": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-chaos-sample.mts",
+    "chaos:import:sample": "node --experimental-strip-types --import ./scripts/register-chaos-import-once.mjs ./scripts/import-chaos-sample-once.mts",
+    "demo:import": "node --experimental-strip-types --import ./scripts/register-demo-import.mjs ./scripts/import-demo-scenario.mts --apply"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.0",
     "leaflet": "^1.9.4",
     "next": "16.4.5",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "react-leaflet": "^5.0.0"
+    "react-leaflet": "^5.0.0",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",

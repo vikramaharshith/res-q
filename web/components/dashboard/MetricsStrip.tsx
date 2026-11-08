@@ -1,51 +1,72 @@
+import { cn } from "@/lib/cn";
 import type { ScenarioMetrics } from "@/lib/demo/metrics";
 
 const CARDS: Array<{
   key: keyof ScenarioMetrics;
   label: string;
   hint: string;
+  valueClass: string;
+  ruleClass: string;
 }> = [
   {
     key: "totalReports",
-    label: "Total reports",
+    label: "Total Reports",
     hint: "Original messages kept",
+    valueClass: "text-white",
+    ruleClass: "bg-zinc-400",
   },
   {
     key: "needsReview",
-    label: "Needs review",
+    label: "Needs Review",
     hint: "New or needs review",
+    valueClass: "text-amber-300",
+    ruleClass: "bg-amber-300",
   },
   {
     key: "availableResponders",
-    label: "Available responders",
+    label: "Available Responders",
     hint: "Seeded units only",
+    valueClass: "text-emerald-300",
+    ruleClass: "bg-emerald-300",
   },
   {
     key: "simulatedAssignments",
-    label: "Simulated assignments",
-    hint: "Scenario baseline, not AI",
+    label: "Assignments",
+    hint: "Baseline plus human decisions",
+    valueClass: "text-cyan-200",
+    ruleClass: "bg-cyan-300",
   },
 ];
 
 export function MetricsStrip({ metrics }: { metrics: ScenarioMetrics }) {
   return (
-    <section
-      aria-label="Scenario overview"
-      className="shrink-0 border-b border-white/10 bg-[#071018] px-3 py-3 sm:px-4"
-    >
-      <dl className="grid grid-cols-2 gap-2 lg:grid-cols-4">
+    <section aria-label="Scenario overview" className="startup-chrome-top">
+      <dl className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         {CARDS.map((card) => (
           <div
             key={card.key}
-            className="rounded-xl border border-cyan-200/10 bg-white/[0.03] px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+            className="rounded-2xl border border-white/[0.06] bg-[#101010] px-4 py-4 transition-[border-color,background-color] duration-200 hover:border-white/[0.14] hover:bg-[#141414] sm:px-5 sm:py-5"
           >
-            <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
-              {card.label}
+            <dt className="flex items-start gap-2.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-500 sm:text-[11px]">
+              <span
+                className={cn("mt-1.5 h-1 w-5 shrink-0 rounded-full", card.ruleClass)}
+                aria-hidden
+              />
+              <span>{card.label}</span>
             </dt>
-            <dd className="mt-1 font-mono text-2xl font-semibold text-white">
+            <dd
+              className={cn(
+                "mt-3 text-4xl font-medium tracking-tight tabular-nums sm:text-5xl",
+                card.valueClass,
+              )}
+            >
               {metrics[card.key]}
             </dd>
-            <dd className="mt-1 text-[11px] text-slate-500">{card.hint}</dd>
+            <dd className="mt-2 text-xs leading-5 text-zinc-500">
+              {card.key === "simulatedAssignments"
+                ? `${metrics.baselineAssignments} baseline · ${metrics.humanAssignments} human-approved`
+                : card.hint}
+            </dd>
           </div>
         ))}
       </dl>

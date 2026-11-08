@@ -1,0 +1,30 @@
+{
+  "name": "chaos-engine",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Deterministic simulation foundation for RES-Q by B7.",
+  "type": "module",
+  "exports": {
+    ".": "./dist/src/index.js",
+    "./schema/resq.simulation.v1.json": "./dist/src/export/public-simulation-export-v1.schema.json"
+  },
+  "bin": { "chaos-engine": "./dist/src/cli/main.js" },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && tsx scripts/copy-export-schema.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "tsx --test test/**/*.test.ts",
+    "check": "npm run typecheck && npm test",
+    "benchmark:phase6f": "tsx scripts/phase-6f-benchmark.ts",
+    "benchmark:phase7a": "tsx scripts/phase-7a-benchmark.ts",
+    "benchmark:phase7c": "tsx scripts/phase-7c-benchmark.ts",
+    "chaos": "tsx src/cli/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  }
+}

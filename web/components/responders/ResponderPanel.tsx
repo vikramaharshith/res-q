@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/Badge";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { cn } from "@/lib/cn";
 import {
+  assignmentOriginLabel,
   assignmentStatusLabel,
   availabilityBadgeClass,
   availabilityLabel,
@@ -24,16 +25,17 @@ export function ResponderPanel({
   });
 
   return (
-    <section className="border-t border-white/10">
+    <section>
       <SectionHeader
+        level={3}
         title="Simulated responders"
         subtitle="Seeded test units. Not verified emergency resources."
       />
-      <div className="space-y-3 px-4 py-4">
+      <div className="space-y-4 px-5 py-5 sm:px-6 sm:py-6">
         {assignment && assignedResponder ? (
           <div className="rounded-xl border border-amber-300/30 bg-amber-300/10 px-3 py-3">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-100">
-              Scenario baseline assignment
+              {assignmentOriginLabel(assignment.origin)}
             </p>
             <p className="mt-1 text-sm text-amber-50">
               {assignedResponder.callsign} · {assignmentStatusLabel(assignment.status)}
@@ -57,7 +59,7 @@ export function ResponderPanel({
               <li
                 key={responder.id}
                 className={cn(
-                  "flex items-start justify-between gap-3 py-2.5",
+                  "flex items-start justify-between gap-3 py-3",
                   linked && "rounded-lg bg-amber-300/5 px-2",
                 )}
               >

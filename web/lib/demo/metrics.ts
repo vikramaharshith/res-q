@@ -5,6 +5,8 @@ export interface ScenarioMetrics {
   needsReview: number;
   availableResponders: number;
   simulatedAssignments: number;
+  baselineAssignments: number;
+  humanAssignments: number;
 }
 
 export function getScenarioMetrics(scenario: Scenario): ScenarioMetrics {
@@ -18,6 +20,12 @@ export function getScenarioMetrics(scenario: Scenario): ScenarioMetrics {
       (responder) => responder.availability === "AVAILABLE",
     ).length,
     simulatedAssignments: scenario.assignments.length,
+    baselineAssignments: scenario.assignments.filter(
+      (assignment) => assignment.origin === "scenario_baseline",
+    ).length,
+    humanAssignments: scenario.assignments.filter(
+      (assignment) => assignment.origin !== "scenario_baseline",
+    ).length,
   };
 }
 

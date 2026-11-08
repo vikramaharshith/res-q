@@ -259,8 +259,9 @@ export async function callNemotron(input: {
       body: JSON.stringify({
         model: input.config.modelId,
         messages: input.messages,
-        tools: input.tools,
-        tool_choice: input.toolChoice,
+        ...(input.tools.length > 0
+          ? { tools: input.tools, tool_choice: input.toolChoice }
+          : { tool_choice: "none" }),
         max_tokens: 2048,
         temperature: 0.2,
         stream: false,

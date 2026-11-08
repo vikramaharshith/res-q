@@ -1,0 +1,204 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://resq.invalid/schemas/simulation-v1.json",
+  "title": "RES-Q Public Fictional Simulation Export v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "engineVersion", "runId", "scenario", "simulationTime", "emergencyObservations", "operationalObservations", "units", "assignments", "replayManifest", "summary"],
+  "properties": {
+    "schemaVersion": { "const": "resq.simulation.v1" },
+    "engineVersion": { "const": "0.1.0" },
+    "runId": { "$ref": "#/$defs/identifier" },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scenarioId", "seed", "fictional", "label", "difficulty"],
+      "properties": {
+        "scenarioId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "seed": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "fictional": { "const": true },
+        "label": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "difficulty": { "type": ["string", "null"], "enum": ["CALM", "BUSY", "CHAOS", "EXTREME", null] }
+      }
+    },
+    "simulationTime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["startTime", "exportTime", "status"],
+      "properties": {
+        "startTime": { "$ref": "#/$defs/timestamp" },
+        "exportTime": { "$ref": "#/$defs/timestamp" },
+        "status": { "enum": ["READY", "RUNNING", "PAUSED", "COMPLETED", "FAILED"] }
+      }
+    },
+    "emergencyObservations": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/emergencyObservation" } },
+    "operationalObservations": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/operationalObservation" } },
+    "units": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/unit" } },
+    "assignments": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/assignment" } },
+    "replayManifest": { "anyOf": [{ "$ref": "#/$defs/replayManifest" }, { "type": "null" }] },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["emergencyObservationCount", "operationalObservationCount", "unitCount", "assignmentCount", "firstReceivedAt", "lastReceivedAt"],
+      "properties": {
+        "emergencyObservationCount": { "$ref": "#/$defs/count" },
+        "operationalObservationCount": { "$ref": "#/$defs/count" },
+        "unitCount": { "$ref": "#/$defs/count" },
+        "assignmentCount": { "$ref": "#/$defs/count" },
+        "firstReceivedAt": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] },
+        "lastReceivedAt": { "anyOf": [{ "$ref": "#/$defs/timestamp" }, { "type": "null" }] }
+      }
+    }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$" },
+    "timestamp": { "type": "string", "format": "date-time", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$" },
+    "count": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+    "boundedString": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "nullableString": { "type": ["string", "null"], "minLength": 1, "maxLength": 2000 },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fictional", "coordinateSystem", "x", "y", "district", "primaryReference", "secondaryReference", "description", "precision"],
+      "properties": {
+        "fictional": { "const": true },
+        "coordinateSystem": { "const": "SIMULATED_LOCAL_GRID" },
+        "x": { "type": "number", "minimum": -1000000, "maximum": 1000000 },
+        "y": { "type": "number", "minimum": -1000000, "maximum": 1000000 },
+        "district": { "$ref": "#/$defs/nullableString" },
+        "primaryReference": { "$ref": "#/$defs/nullableString" },
+        "secondaryReference": { "$ref": "#/$defs/nullableString" },
+        "description": { "$ref": "#/$defs/boundedString" },
+        "precision": { "type": ["string", "null"], "enum": ["EXACT", "APPROXIMATE", null] }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "statement", "stage", "assistanceRequested", "value", "confidence", "detailStatus"],
+      "properties": {
+        "code": { "$ref": "#/$defs/boundedString" },
+        "statement": { "$ref": "#/$defs/boundedString" },
+        "stage": { "enum": ["NEWLY_OBSERVED", "ONGOING", "IMPROVING"] },
+        "assistanceRequested": { "type": "boolean" },
+        "value": { "$ref": "#/$defs/nullableString" },
+        "confidence": { "type": ["string", "null"], "enum": ["LOW", "MEDIUM", "HIGH", null] },
+        "detailStatus": { "type": ["string", "null"], "enum": ["OBSERVED", "UNKNOWN", null] }
+      }
+    },
+    "emergencyObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reportId", "category", "sourceType", "observedAt", "submittedAt", "receivedAt", "location", "narrative", "claims", "status", "urgency", "sourceMetadata"],
+      "properties": {
+        "reportId": { "$ref": "#/$defs/identifier" },
+        "category": { "enum": ["FLOODED_STRUCTURE", "STRANDED_VEHICLE", "WATER_RESCUE", "EVACUATION_REQUEST", "MEDICAL_ASSISTANCE", "STRUCTURE_FIRE", "BUILDING_COLLAPSE", "ROAD_OBSTRUCTION", "ELECTRICAL_HAZARD", "COMMUNICATION_OUTAGE", "POWER_OUTAGE", "SHELTER_SHORTAGE", "SUPPLY_REQUEST", "INFRASTRUCTURE_FAILURE", "WELFARE_CHECK", "HAZARDOUS_CONDITIONS"] },
+        "sourceType": { "enum": ["CIVILIAN_CALLER", "EMERGENCY_RESPONDER", "AUTOMATED_SENSOR", "EMERGENCY_HOTLINE", "COMMUNITY_ORGANIZATION", "FIELD_OBSERVER"] },
+        "observedAt": { "$ref": "#/$defs/timestamp" },
+        "submittedAt": { "$ref": "#/$defs/timestamp" },
+        "receivedAt": { "$ref": "#/$defs/timestamp" },
+        "location": { "$ref": "#/$defs/location" },
+        "narrative": { "$ref": "#/$defs/boundedString" },
+        "claims": { "type": "array", "maxItems": 100000, "items": { "$ref": "#/$defs/claim" } },
+        "status": { "const": "RECEIVED" },
+        "urgency": { "type": ["string", "null"], "enum": ["LOW", "MODERATE", "HIGH", "CRITICAL", null] },
+        "sourceMetadata": { "anyOf": [{ "$ref": "#/$defs/sourceMetadata" }, { "type": "null" }] }
+      }
+    },
+    "sourceMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["channel", "organizationLabel", "sensorKind"],
+      "properties": {
+        "channel": { "enum": ["VOICE", "RADIO", "SENSOR_NETWORK", "HOTLINE", "COMMUNITY_NETWORK", "FIELD_NOTE"] },
+        "organizationLabel": { "$ref": "#/$defs/nullableString" },
+        "sensorKind": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "operationalObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["observationId", "unitId", "assignmentId", "messageType", "observedAt", "submittedAt", "receivedAt", "source", "deliveryStatus", "content"],
+      "properties": {
+        "observationId": { "$ref": "#/$defs/identifier" },
+        "unitId": { "$ref": "#/$defs/identifier" },
+        "assignmentId": { "anyOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+        "messageType": { "enum": ["RESPONDER_REGISTERED", "ASSIGNMENT_ACKNOWLEDGED", "UNIT_DEPARTED", "POSITION_UPDATED", "ROUTE_UPDATED", "ARRIVAL_REPORTED", "TASK_STARTED", "TASK_COMPLETED", "TASK_FAILED", "TASK_CANCELLED", "UNIT_UNAVAILABLE", "COMMUNICATION_LOST", "COMMUNICATION_RESTORED", "RECOVERY_STARTED", "RECOVERY_COMPLETED", "EQUIPMENT_STATUS_CHANGED", "REPLENISHMENT_COMPLETED"] },
+        "observedAt": { "$ref": "#/$defs/timestamp" },
+        "submittedAt": { "$ref": "#/$defs/timestamp" },
+        "receivedAt": { "$ref": "#/$defs/timestamp" },
+        "source": { "enum": ["RESPONDER_UNIT", "SIMULATION_SYSTEM"] },
+        "deliveryStatus": { "const": "DELIVERED" },
+        "content": { "$ref": "#/$defs/operationalContent" }
+      }
+    },
+    "operationalContent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["availabilityState", "taskStatus", "travelStatus", "communicationState", "location", "routeVersion", "fatigue", "equipmentItem", "equipmentCondition", "inventory"],
+      "properties": {
+        "availabilityState": { "$ref": "#/$defs/nullableAvailabilityState" },
+        "taskStatus": { "$ref": "#/$defs/nullableTaskStatus" },
+        "travelStatus": { "$ref": "#/$defs/nullableTravelStatus" },
+        "communicationState": { "$ref": "#/$defs/nullableCommunicationState" },
+        "location": { "anyOf": [{ "$ref": "#/$defs/location" }, { "type": "null" }] },
+        "routeVersion": { "type": ["integer", "null"], "minimum": 0, "maximum": 1000000 },
+        "fatigue": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "equipmentItem": { "$ref": "#/$defs/nullableString" },
+        "equipmentCondition": { "type": ["string", "null"], "enum": ["OPERATIONAL", "DEGRADED", "UNAVAILABLE", "UNDER_REPAIR", null] },
+        "inventory": {
+          "type": ["object", "null"],
+          "propertyNames": { "minLength": 1, "maxLength": 2000 },
+          "additionalProperties": { "type": "integer", "minimum": 0, "maximum": 10000 }
+        }
+      }
+    },
+    "nullableAvailabilityState": { "type": ["string", "null"], "enum": ["AVAILABLE", "RESERVED", "EN_ROUTE", "ON_SCENE", "BUSY", "RECOVERING", "OFFLINE", null] },
+    "nullableTaskStatus": { "type": ["string", "null"], "enum": ["PENDING", "ASSIGNED", "EN_ROUTE", "IN_PROGRESS", "COMPLETED", "FAILED", "CANCELLED", null] },
+    "nullableTravelStatus": { "type": ["string", "null"], "enum": ["EN_ROUTE", "ARRIVED", "BLOCKED", "INTERRUPTED", "CANCELLED", null] },
+    "nullableCommunicationState": { "type": ["string", "null"], "enum": ["CONNECTED", "DEGRADED", "INTERMITTENT", "OFFLINE", "RECOVERING", null] },
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unitId", "callsign", "latestObservedAt", "latestReceivedAt", "availabilityState", "assignmentId", "taskStatus", "travelStatus", "communicationState", "location"],
+      "properties": {
+        "unitId": { "$ref": "#/$defs/identifier" },
+        "callsign": { "$ref": "#/$defs/boundedString" },
+        "latestObservedAt": { "$ref": "#/$defs/timestamp" },
+        "latestReceivedAt": { "$ref": "#/$defs/timestamp" },
+        "availabilityState": { "$ref": "#/$defs/nullableAvailabilityState" },
+        "assignmentId": { "anyOf": [{ "$ref": "#/$defs/identifier" }, { "type": "null" }] },
+        "taskStatus": { "$ref": "#/$defs/nullableTaskStatus" },
+        "travelStatus": { "$ref": "#/$defs/nullableTravelStatus" },
+        "communicationState": { "$ref": "#/$defs/nullableCommunicationState" },
+        "location": { "anyOf": [{ "$ref": "#/$defs/location" }, { "type": "null" }] }
+      }
+    },
+    "assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["assignmentId", "unitId", "firstReceivedAt"],
+      "properties": {
+        "assignmentId": { "$ref": "#/$defs/identifier" },
+        "unitId": { "$ref": "#/$defs/identifier" },
+        "firstReceivedAt": { "$ref": "#/$defs/timestamp" }
+      }
+    },
+    "replayManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presetVersion", "engineVersion", "schemaVersion", "scenario", "difficulty", "seed", "reportCount", "responderCount", "durationMs"],
+      "properties": {
+        "presetVersion": { "const": "phase7b.v1" },
+        "engineVersion": { "const": "0.1.0" },
+        "schemaVersion": { "const": "resq.simulation.v1" },
+        "scenario": { "enum": ["flood", "earthquake", "storm", "fire"] },
+        "difficulty": { "enum": ["CALM", "BUSY", "CHAOS", "EXTREME"] },
+        "seed": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "reportCount": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "responderCount": { "type": "integer", "minimum": 1, "maximum": 1000 },
+        "durationMs": { "type": "integer", "minimum": 600000, "maximum": 604800000 }
+      }
+    }
+  }
+}

@@ -1,6 +1,9 @@
+import { connection } from "next/server";
+
 import { investigateIncident } from "@/lib/ai/agent-orchestrator";
 import { redactSecrets } from "@/lib/ai/nemotron-client";
 import type { AgentRunDto } from "@/lib/ai/types";
+import { loadStoredHistory, rememberInvestigation } from "@/lib/approval/history";
 
 export const maxDuration = 180;
 
@@ -40,6 +43,14 @@ function invalid(message: string): Response {
   return respond(run, 400);
 }
 
+export async function GET(): Promise<Response> {
+  await connection();
+  const history = await loadStoredHistory();
+  return Response.json(redactSecrets(history), {
+    headers: { "Cache-Control": "no-store" },
+  });
+}
+
 export async function POST(request: Request): Promise<Response> {
   let raw = "";
   try {
@@ -70,7 +81,8 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const result = await investigateIncident(record.incident_id);
-    return respond(result.run, result.httpStatus);
+    const stored = await rememberInvestigation(result.run);
+    return respond(stored, result.httpStatus);
   } catch (error) {
     const name = error instanceof Error ? error.name : "Error";
     console.error(`[resq-agent] route_unexpected=${name}`);
